@@ -1,32 +1,29 @@
-class Employee
+require 'active_record'
 
-  attr_reader :name, :salary
+ActiveRecord::Base.establish_connection(
+  adapter: 'sqlite3',
+  database: 'development.sqlite3'
+)
 
-  def initialize(name:, salary:, email: nil, phone: nil)
-    @name = name
-    @salary = salary
-    @email = email
-    @phone = phone
-    @reviews = []
-    @satisfactory = true
-  end
+class Employee < ActiveRecord::Base
+  belongs_to :department
+  has_and_belongs_to_many :committees
+  has_many :reviews, dependent: :destroy
 
-  def recent_review
-    @reviews.last
-  end
+  validates :salary, presence: true
 
   def satisfactory?
-    @satisfactory
+    satisfactory
   end
 
   def give_raise(amount)
-    @salary += amount
+    update(salary: self.salary + amount)
   end
 
-  def give_review(review)
-    @reviews << review
+  def give_review(new_review)
+    self.review = new_review
     assess_performance
-    true
+    save
   end
 
   def assess_performance
@@ -35,9 +32,25 @@ class Employee
     good_terms = Regexp.union(good_terms)
     bad_terms = Regexp.union(bad_terms)
 
-    count_good = @reviews.last.scan(good_terms).length
-    count_bad = @reviews.last.scan(bad_terms).length
+    count_good = review.scan(good_terms).length
+    count_bad = review.scan(bad_terms).length
 
-    @satisfactory = (count_good - count_bad > 0)
+    self.satisfactory = (count_good - count_bad > 0)
   end
+
+  # SOLUTION FOR: * Return all employees who are getting paid more than the average salary.
+  def self.overpaid
+    # MOSTLY-SQL Solution
+    # average = Employee.select("AVG(salary) AS average_salary").first.average_salary
+    # Employee.where(["salary > ?", average])
+
+    # MOSTLY-RUBY Solution
+    total = 0
+    Employee.all.each do |e|
+      total += e.salary
+    end
+    average = total / Employee.count
+    Employee.where(["salary > ?", average])
+  end
+
 end

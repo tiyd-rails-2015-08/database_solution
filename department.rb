@@ -1,22 +1,56 @@
-class Department
+require 'active_record'
 
-  attr_reader :name, :employees
+ActiveRecord::Base.establish_connection(
+  adapter: 'sqlite3',
+  database: 'development.sqlite3'
+)
 
-  def initialize(name)
-    @name = name
-    @employees = []
-  end
+class Department < ActiveRecord::Base
+  has_many :employees, dependent: :restrict_with_error
+  has_many :reviews, through: :employees
+  validates :name, uniqueness: true
 
   def add_employee(employee)
-    @employees << employee
+    employees << employee
   end
 
   def total_salary
-    @employees.reduce(0){|sum, employee| sum + employee.salary}
+    employees.reduce(0){|sum, employee| sum + employee.salary}
   end
 
   def give_raise(total_amount)
-    getting_raise = @employees.select {|e| e.satisfactory?}
+    getting_raise = employees.select {|e| e.satisfactory?}
     getting_raise.each {|e| e.give_raise(total_amount / getting_raise.length)}
+  end
+
+  # SOLUTION FOR: * Return the total number of employees in a department.
+  def employee_count
+    employees.count
+  end
+
+  # SOLUTION FOR: * Return the employee who is being paid the least in a department.
+  def lowest_paid_employee
+    # SQL-HEAVY solution
+    employees.order(:salary).first
+
+    # RUBY-HEAVY solution
+    # employees.sort_by {|e| e.salary}.first
+  end
+
+  # SOLUTION FOR: * Return all employees in a department, ordered alphabetically by name.
+  def sorted_employees
+    # SQL-HEAVY solution
+    employees.order(:name)
+
+    # RUBY-HEAVY solution
+    # employees.sort_by {|e| e.name}
+
+  end
+
+  # SOLUTION FOR: * Move everyone from one department to another department.
+  def move_employees(new_department)
+    employees.each do |e|
+      new_department.add_employee(e)
+    end
   end
 end
