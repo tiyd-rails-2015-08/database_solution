@@ -53,4 +53,21 @@ class Department < ActiveRecord::Base
       new_department.add_employee(e)
     end
   end
+
+  # SOLUTION FOR: * Return the department with the most employees.
+  def self.biggest
+    # SQL-HEAVY solution
+    joins(:employees).group(:department_id).order("count(employees.id) DESC").first
+
+    # # RUBY-HEAVY solution
+    # dept = nil
+    # count = 0
+    # all.each do |d|
+    #   if d.employees.count > count
+    #     dept = d
+    #     count = d.employees.count
+    #   end
+    # end
+    # dept
+  end
 end

@@ -219,6 +219,18 @@ class ReviewsTest < Minitest::Test
   end
 
   # TEST FOR: * Return the department with the most employees.
+  def test_most_employees
+    a = Employee.create(name: "A", salary: 100)
+    b = Employee.create(name: "B", salary: 200)
+
+    m = Department.create(name: "Marketing")
+    s = Department.create(name: "Sales")
+
+    s.add_employee(a)
+    s.add_employee(b)
+
+    assert_equal s, Department.biggest
+  end
 
   # TEST FOR: * Move everyone from one department to another department.
   def test_move_employees
@@ -238,10 +250,16 @@ class ReviewsTest < Minitest::Test
   end
 
   # TEST FOR: * Give a raise of 10% to ALL employees with good reviews.  This is different from the raise method which already exists, and also needs to operate over all employees of ALL departments.
+  def test_give_all_satisfactory_raises
+    employee = Employee.create( name: "Joanna", email: "jdark@example.com", phone: "515-888-4821", salary: 80000)
+    employee2 = Employee.create( name: "Lunk", email: "lunk@example.com", phone: "882-329-3843", salary: 150000)
+    employee2.give_review("bad negative less")
 
+    Employee.raise_all_satisfactory
 
-
-
+    assert_equal 88000, employee.reload.salary # No raise
+    assert_equal 150000, employee2.reload.salary # No raise
+  end
 
 
   # Tests uniqueness validation
