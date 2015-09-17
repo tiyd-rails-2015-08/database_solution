@@ -200,7 +200,6 @@ class ReviewsTest < Minitest::Test
 
   # TEST FOR: * Return all employees who are getting paid more than the average salary.
   def test_overpaid_employees
-    Employee.destroy_all
     low = Employee.create( name: "Zeke", salary: 100)
     med = Employee.create( name: "Zeke", salary: 200)
     high = Employee.create( name: "Zeke", salary: 300)
@@ -210,6 +209,14 @@ class ReviewsTest < Minitest::Test
   end
 
   # TEST FOR: * Return all employees with names which are palindromes.
+  def test_palindrome_employees
+    a = Employee.create( name: "amy", salary: 100)
+    b = Employee.create( name: "bob", salary: 200)
+    c = Employee.create( name: "christen", salary: 300)
+    d = Employee.create( name: "dad", salary: 400)
+
+    assert_equal [b, d], Employee.palindromes
+  end
 
   # TEST FOR: * Return the department with the most employees.
 
